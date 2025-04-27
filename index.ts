@@ -1,12 +1,17 @@
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import { pluralSuffix, TARGET_DATE_STR } from "./shared.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 42069;
 
 app.set("view engine", "ejs");
 app.set("trust proxy", true);
-app.use(express.static("public"))
+app.use(express.static(path.join(__dirname, "public")));
 
 function makeCountdown(diff:number) {
 	const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -35,6 +40,9 @@ function makeStatus(diff:number) {
 	return status;
 }
 
+app.get("/shared.js", (req, res) => {
+	res.sendFile(path.join(__dirname, "shared.js"));
+});
 
 app.get("/", (req, res) => {
 	const countdownTarget = new Date(TARGET_DATE_STR);
