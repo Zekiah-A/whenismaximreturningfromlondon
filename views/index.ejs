@@ -113,12 +113,12 @@
 		<small>© <a href="https://github.com/Zekiah-A/whenismaximreturningfromlondon">Zekiah-A</a>, <a href="https://getfullyear.com/">2025</a></small>
 	</footer>
 </body>
-<script>
-	const timer = document.getElementById("timer");
+<script type="module">
+	import { pluralSuffix, TARGET_DATE_STR } from "./shared.js";
 
-	function pluralSuffix(word, num) {
-		return num === 1 ? word : word + "s";
-	}
+	const timer = document.getElementById("timer");
+	const date = new Date();
+	const targetDate = new Date(TARGET_DATE_STR);
 
 	function makeStatus(diff) {
 		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -142,8 +142,6 @@
 		return status;
 	}
 
-	const date = new Date();
-	const targetDate = new Date("2025-04-28T15:44:00+01:00");
 	function updateTimer() {
 		const now = new Date();
 		const diff = targetDate - now;

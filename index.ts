@@ -1,25 +1,53 @@
 import express from "express";
+import { pluralSuffix, TARGET_DATE_STR } from "./shared.js";
 
 const app = express();
 const PORT = process.env.PORT || 42069;
 
 app.set("view engine", "ejs");
+app.set("trust proxy", true);
+app.use(express.static("public"))
 
-app.get("/", (req, res) => {
-	const countdownTarget = new Date("2025-04-28T15:44:00+01:00");
-	const now = new Date();
-	const diff = countdownTarget.getTime() - now.getTime();
+function makeCountdown(diff:number) {
 	const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 	const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
 	const minutes = Math.floor((diff / (1000 * 60)) % 60);
 	const countdown = `${days}d, ${hours}h, ${minutes}m`;
-	let status = `${days > 1 ? days + " days" : days + " day"}, ${hours > 1 ? hours + " hours" : hours + " hour"
-		}, and ${minutes > 1 ? minutes + " minutes" : " minute"} left until Maxim returns from London!`;
+	return countdown;
+}
+
+function makeStatus(diff:number) {
+	const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+	const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+	const minutes = Math.floor((diff / (1000 * 60)) % 60);
+	const seconds = Math.floor((diff / 1000) % 60);
+
+	let status = "";
+	if (days > 0) {
+		status += `${days} ${pluralSuffix("day", days)}, `;
+	}
+	if (hours > 0) {
+		status += `${hours} ${pluralSuffix("hour", hours)}, `;
+	}
+	if (minutes > 0) {
+		status += `${minutes} ${pluralSuffix("minute", minutes)}`;
+	}
+	return status;
+}
+
+
+app.get("/", (req, res) => {
+	const countdownTarget = new Date(TARGET_DATE_STR);
+	const now = new Date();
+	const diff = countdownTarget.getTime() - now.getTime();
+	let status = makeStatus(diff);
+	let countdown = makeCountdown(diff);
 	if (diff <= 0) {
 		status = "He has returned 🎉";
+		countdown = "Maxim's back!"
 	}
 
-	const siteUrl = req.protocol + '://' + req.get("host");
+	const siteUrl = `${req.protocol}://${req.get('host')}`;
 	res.render("index", {
 		status: status,
 		countdown: countdown,
